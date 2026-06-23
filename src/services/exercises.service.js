@@ -1,6 +1,7 @@
 import {
   createExercise,
   findExercisesByUserId,
+  countExercisesByUserId,
 } from "../repositories/exercises.repo.js";
 import { findUserById } from "../repositories/users.repo.js";
 
@@ -51,23 +52,18 @@ export function getUserLogs(userId, { from, to, limit }) {
     throw err;
   }
 
-  let logs = findExercisesByUserId(userId);
+  let limitNum;
+  if (limit !== undefined) {
+    limitNum = Number(limit);
+    if (!Number.isInteger(limitNum) || limitNum <= 0) {
+      const err = new Error("limit must be a positive integer");
+      err.status = 400;
+      throw err;
+    }
+  }
 
-  if (from) logs = logs.filter((e) => e.date >= from);
-  if (to) logs = logs.filter((e) => e.date <= to);
+  const count = countExercisesByUserId(userId, { from, to });
+  const logs = findExercisesByUserId(userId, { from, to, limit: limitNum });
 
-  const count = logs.length;
-  if (limit) logs = logs.slice(0, Number(limit));
-
-  return {
-    id: user.id,
-    username: user.username,
-    count,
-    logs: logs.map((e) => ({
-      id: e.id,
-      description: e.description,
-      duration: e.duration,
-      date: e.date,
-    })),
-  };
+  return { id: user.id, username: user.username, count, logs };
 }
