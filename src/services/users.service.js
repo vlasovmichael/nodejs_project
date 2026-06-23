@@ -11,12 +11,13 @@ export function registerUser(username) {
     err.status = 400;
     throw err;
   }
-  if (findUserByUsername(username)) {
+  const cleanUsername = username.trim();
+  if (findUserByUsername(cleanUsername)) {
     const err = new Error("username already taken");
     err.status = 409;
     throw err;
   }
-  return createUser(username);
+  return createUser(cleanUsername);
 }
 
 export function getAllUsers() {
@@ -44,7 +45,8 @@ export function getUserByUsername(username) {
     err.status = 400;
     throw err;
   }
-  const user = findUserByUsername(username);
+  const cleanUsername = username.trim();
+  const user = findUserByUsername(cleanUsername);
   if (!user) {
     const err = new Error("user not found");
     err.status = 404;

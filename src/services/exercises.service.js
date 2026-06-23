@@ -10,18 +10,18 @@ export function addExercise(userId, { description, duration, date }) {
     err.status = 400;
     throw err;
   }
-  if (
-    !description ||
-    typeof description !== "string" ||
-    description.trim() === ""
-  ) {
+
+  if (typeof description !== "string" || description.trim() === "") {
     const err = new Error("description is required");
     err.status = 400;
     throw err;
   }
+  const cleanDescription = description.trim();
   const durationNum = Number(duration);
-  if (!Number.isInteger(durationNum)) {
-    const err = new Error("duration is required and must be an integer");
+  if (!Number.isInteger(durationNum) || durationNum <= 0) {
+    const err = new Error(
+      "duration is required and must be a positive integer",
+    );
     err.status = 400;
     throw err;
   }
@@ -39,7 +39,8 @@ export function addExercise(userId, { description, duration, date }) {
   const exerciseDate = date
     ? new Date(date).toISOString().split("T")[0]
     : new Date().toISOString().split("T")[0];
-  return createExercise(userId, description, durationNum, exerciseDate);
+
+  return createExercise(userId, cleanDescription, durationNum, exerciseDate);
 }
 
 export function getUserLogs(userId, { from, to, limit }) {
